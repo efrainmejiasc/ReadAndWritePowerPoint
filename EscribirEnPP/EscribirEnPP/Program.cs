@@ -2,6 +2,7 @@
 using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,10 +13,44 @@ namespace EscribirEnPP
     {
         public static void Main(string[] args)
         {
-
-            ReadSlide();
+            if (WriteOnSlide())
+                Console.WriteLine("La aplicacion escribio correctamente en la diapositiva");
             Console.ReadKey();
-           
+        }
+
+        public static void ReadSlide()
+        {
+            try
+            {
+                string filePath = CurrentDirectory() + @"\EjemploCreado.pptx";
+
+                Application pptApplication = new Application();
+                Presentations multi_presentations = pptApplication.Presentations;
+                Presentation presentation = multi_presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+
+                string presentationText = string.Empty;
+                foreach (var item in presentation.Slides[1].Shapes)
+                {
+                    var shape = (Microsoft.Office.Interop.PowerPoint.Shape)item;
+                    if (shape.HasTextFrame == MsoTriState.msoTrue)
+                    {
+                        if (shape.TextFrame.HasText == MsoTriState.msoTrue)
+                        {
+                            var textRange = shape.TextFrame.TextRange;
+                            var text = textRange.Text;
+
+                            presentationText += text + " ";
+                        }
+                    }
+                }
+
+                Console.WriteLine(presentationText);
+            }
+            catch (Exception ex)
+            {
+                WriteException(ex.ToString());
+            }
+
         }
 
         private static bool WriteOnSlide()
@@ -27,6 +62,32 @@ namespace EscribirEnPP
                 Application pptApplication = new Application();
                 Presentations multi_presentations = pptApplication.Presentations;
                 Presentation presentation = multi_presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+                CustomLayout customLayout = presentation.SlideMaster.CustomLayouts[PpSlideLayout.ppLayoutText];
+
+                Slides slides = presentation.Slides;
+                Microsoft.Office.Interop.PowerPoint.Shapes shapes = presentation.Slides[1].Shapes;
+                TextRange objText;
+
+                slides = presentation.Slides;
+
+                var text1 = "Hola Mundo";
+                var text2 = "Estoy escribiendo en la descripcion del power point";
+
+                objText = shapes[1].TextFrame.TextRange;
+                objText.Text = text1;
+                objText.Font.Name = "Arial";
+                objText.Font.Size = 32;
+
+                objText = shapes[2].TextFrame.TextRange;
+                objText.Text = text2;
+                objText.Font.Name = "Arial";
+                objText.Font.Size = 28;
+
+                ReadWriteTxt(filePath);
+                presentation.SaveAs(filePath, PpSaveAsFileType.ppSaveAsDefault, MsoTriState.msoTrue);
+                presentation.Close();
+                pptApplication.Quit();
+
                 resultado = true;
             }
             catch (Exception ex)
@@ -76,44 +137,17 @@ namespace EscribirEnPP
             return resultado;
         }
 
-        public static void ReadSlide()
-        {
-            try
-            {
-                string filePath = CurrentDirectory() + @"\EjemploCreado.pptx";
-
-                Application pptApplication = new Application();
-                Presentations multi_presentations = pptApplication.Presentations;
-                Presentation presentation = multi_presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-
-                string presentationText = string.Empty;
-                foreach (var item in presentation.Slides[1].Shapes)
-                {
-                    var shape = (Microsoft.Office.Interop.PowerPoint.Shape)item;
-                    if (shape.HasTextFrame == MsoTriState.msoTrue)
-                    {
-                        if (shape.TextFrame.HasText == MsoTriState.msoTrue)
-                        {
-                            var textRange = shape.TextFrame.TextRange;
-                            var text = textRange.Text;
-
-                            presentationText+= text + " ";
-                        }
-                    }
-                }
-
-                Console.WriteLine(presentationText);
-            }
-            catch (Exception ex)
-            {
-                WriteException(ex.ToString());
-            }
-
-        }
+      
 
         private static string CurrentDirectory()
         {
             return System.IO.Directory.GetCurrentDirectory();
+        }
+
+        public static void ReadWriteTxt(string pathArchivo)
+        {
+            FileAttributes atr = File.GetAttributes(pathArchivo);
+            File.SetAttributes(pathArchivo, atr & ~FileAttributes.ReadOnly);
         }
 
         private static void WriteException(string exception)
