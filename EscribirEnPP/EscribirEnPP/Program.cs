@@ -11,8 +11,13 @@ namespace EscribirEnPP
 {
     public class Program
     {
+        private static string fileName = @"\EjemploCreado.pptx";
+
         public static void Main(string[] args)
         {
+            if (!ExisteArchivo())
+                CreatePresentation();
+
             if (WriteOnSlide())
                 Console.WriteLine("La aplicacion escribio correctamente en la diapositiva");
             Console.ReadKey();
@@ -22,7 +27,7 @@ namespace EscribirEnPP
         private static bool WriteOnSlide()
         {
             var resultado = false;
-            string filePath = CurrentDirectory() + @"\EjemploCreado.pptx";
+            string filePath = CurrentDirectory() + fileName;
             try
             {
                 Application pptApplication = new Application();
@@ -36,8 +41,8 @@ namespace EscribirEnPP
 
                 slides = presentation.Slides;
 
-                var text1 = "Hola Mundo";
-                var text2 = "Estoy escribiendo en la descripcion del power point";
+                var text1 = "Esto es una prueba de escribir en el titulo";
+                var text2 = "Estoy escribiendo en la seccion de contenido de la diapositiva PPT";
 
                 objText = shapes[1].TextFrame.TextRange;
                 objText.Text = text1;
@@ -81,16 +86,17 @@ namespace EscribirEnPP
                 slide = slides.AddSlide(1, customLayout);
 
                 objText = slide.Shapes[1].TextFrame.TextRange;
-                objText.Text = "Escribiendo en PPT desde cero";
+                objText.Text = "Escriba un titulo";
                 objText.Font.Name = "Arial";
                 objText.Font.Size = 32;
 
                 objText = slide.Shapes[2].TextFrame.TextRange;
-                objText.Text = "Otra Linea en PPT";
+                objText.Text = "Escriba un contenido";
+                objText.Font.Size = 28;
 
-                slide.NotesPage.Shapes[2].TextFrame.TextRange.Text = "Presentacion Creada";
+                slide.NotesPage.Shapes[2].TextFrame.TextRange.Text = "Presentacion creada desde C#, Efrain Mejias C";
 
-                pptPresentation.SaveAs(CurrentDirectory() + @"\EjemploCreado.pptx", PpSaveAsFileType.ppSaveAsDefault, MsoTriState.msoTrue);
+                pptPresentation.SaveAs(CurrentDirectory() + fileName, PpSaveAsFileType.ppSaveAsDefault, MsoTriState.msoTrue);
                 pptPresentation.Close();
                 pptApplication.Quit();
                 resultado = true;
@@ -107,7 +113,7 @@ namespace EscribirEnPP
         {
             try
             {
-                string filePath = CurrentDirectory() + @"\EjemploCreado.pptx";
+                string filePath = CurrentDirectory() + fileName;
 
                 Application pptApplication = new Application();
                 Presentations multi_presentations = pptApplication.Presentations;
@@ -138,16 +144,24 @@ namespace EscribirEnPP
 
         }
 
-
         private static string CurrentDirectory()
         {
             return System.IO.Directory.GetCurrentDirectory();
         }
 
-        public static void ReadWriteTxt(string pathArchivo)
+        private static void ReadWriteTxt(string pathArchivo)
         {
             FileAttributes atr = File.GetAttributes(pathArchivo);
-            File.SetAttributes(pathArchivo, atr & ~FileAttributes.ReadOnly);
+            File.SetAttributes(pathArchivo,atr & ~FileAttributes.ReadOnly);
+        }
+
+        private static bool ExisteArchivo()
+        {
+            bool result = false;
+            if (File.Exists(CurrentDirectory() + fileName))
+                result = true;
+
+            return result;
         }
 
         private static void WriteException(string exception)
