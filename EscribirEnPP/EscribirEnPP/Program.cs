@@ -18,40 +18,6 @@ namespace EscribirEnPP
             Console.ReadKey();
         }
 
-        public static void ReadSlide()
-        {
-            try
-            {
-                string filePath = CurrentDirectory() + @"\EjemploCreado.pptx";
-
-                Application pptApplication = new Application();
-                Presentations multi_presentations = pptApplication.Presentations;
-                Presentation presentation = multi_presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-
-                string presentationText = string.Empty;
-                foreach (var item in presentation.Slides[1].Shapes)
-                {
-                    var shape = (Microsoft.Office.Interop.PowerPoint.Shape)item;
-                    if (shape.HasTextFrame == MsoTriState.msoTrue)
-                    {
-                        if (shape.TextFrame.HasText == MsoTriState.msoTrue)
-                        {
-                            var textRange = shape.TextFrame.TextRange;
-                            var text = textRange.Text;
-
-                            presentationText += text + " ";
-                        }
-                    }
-                }
-
-                Console.WriteLine(presentationText);
-            }
-            catch (Exception ex)
-            {
-                WriteException(ex.ToString());
-            }
-
-        }
 
         private static bool WriteOnSlide()
         {
@@ -137,7 +103,41 @@ namespace EscribirEnPP
             return resultado;
         }
 
-      
+        public static void ReadSlide()
+        {
+            try
+            {
+                string filePath = CurrentDirectory() + @"\EjemploCreado.pptx";
+
+                Application pptApplication = new Application();
+                Presentations multi_presentations = pptApplication.Presentations;
+                Presentation presentation = multi_presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+
+                string presentationText = string.Empty;
+                foreach (var item in presentation.Slides[1].Shapes)
+                {
+                    var shape = (Microsoft.Office.Interop.PowerPoint.Shape)item;
+                    if (shape.HasTextFrame == MsoTriState.msoTrue)
+                    {
+                        if (shape.TextFrame.HasText == MsoTriState.msoTrue)
+                        {
+                            var textRange = shape.TextFrame.TextRange;
+                            var text = textRange.Text;
+
+                            presentationText += text + " ";
+                        }
+                    }
+                }
+
+                Console.WriteLine(presentationText);
+            }
+            catch (Exception ex)
+            {
+                WriteException(ex.ToString());
+            }
+
+        }
+
 
         private static string CurrentDirectory()
         {
